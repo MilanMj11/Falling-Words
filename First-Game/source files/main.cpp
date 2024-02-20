@@ -98,13 +98,6 @@ int main()
     }
 
 
-    string rand_word = get_random_word();
-
-    cout << rand_word;
-
-    Text text(rand_word, words_font, 20);
-    text.setPosition(left_space, up_space); // Set the position of the text
-    text.setFillColor(Color::White); // Set the fill color
 
 
 
@@ -113,6 +106,10 @@ int main()
     AppState currentState = AppState::Playing;
     // -> speed = words / minute
     int gameSpeed = 60;
+
+    Clock clock;
+    Time elapsedTime;
+    vector<Text*> text_list;
 
 
     while (window.isOpen())
@@ -131,7 +128,33 @@ int main()
         if (currentState == AppState::Playing) {
             window.draw(GameSpaceRectangle);
             window.draw(ScoreDetailsRectangle);
-            window.draw(text);
+
+            Time frameTime = clock.restart();
+            elapsedTime += frameTime;
+
+
+            if (elapsedTime.asSeconds() >= 1.0f) {
+
+                string rand_word = get_random_word();
+
+                Text *new_text = new Text();
+                (*new_text).setFont(words_font);
+                (*new_text).setString(rand_word);
+                (*new_text).setCharacterSize(20);
+                (*new_text).setPosition(left_space, up_space); // Set the position of the text
+                (*new_text).setFillColor(Color::White); // Set the fill color
+
+                text_list.push_back(new_text);
+
+                elapsedTime = Time::Zero;
+            }
+
+            
+            for (auto it : text_list) {
+                (*it).move(0, gameSpeed * frameTime.asSeconds());
+                window.draw(*it);
+            }
+
         }
 
 
