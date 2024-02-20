@@ -31,7 +31,7 @@ void create_words_list() {
     string word;
     int k = 0;
     while (file >> word) {
-        if (word.size() < 5) continue;
+        // if (word.size() < 4) continue;
         words_list[++k] = word;
     }
 
@@ -51,6 +51,16 @@ string get_random_word() {
 
     return words_list[randomNumber];
 
+}
+
+bool isTextFullyInside(const sf::Text& text, const sf::RectangleShape& rectangle) {
+    sf::FloatRect textBounds = text.getGlobalBounds();
+    sf::FloatRect rectangleBounds = rectangle.getGlobalBounds();
+
+    return textBounds.left >= rectangleBounds.left &&
+        textBounds.top >= rectangleBounds.top &&
+        textBounds.left + textBounds.width <= rectangleBounds.left + rectangleBounds.width &&
+        textBounds.top + textBounds.height <= rectangleBounds.top + rectangleBounds.height;
 }
 
 int main()
@@ -126,6 +136,7 @@ int main()
         /// ----------------------- DRAW ----------------------------
 
         if (currentState == AppState::Playing) {
+
             window.draw(GameSpaceRectangle);
             window.draw(ScoreDetailsRectangle);
 
@@ -133,27 +144,60 @@ int main()
             elapsedTime += frameTime;
 
 
-            if (elapsedTime.asSeconds() >= 1.0f) {
+            if (elapsedTime.asSeconds() >= 1.0f) { /// Every second we generate a new word to print
 
                 string rand_word = get_random_word();
 
                 Text *new_text = new Text();
                 (*new_text).setFont(words_font);
                 (*new_text).setString(rand_word);
-                (*new_text).setCharacterSize(20);
-                (*new_text).setPosition(left_space, up_space); // Set the position of the text
-                (*new_text).setFillColor(Color::White); // Set the fill color
+                (*new_text).setCharacterSize(20); /// CHANGE FONT SIZE LATER MAYBE
+                (*new_text).setFillColor(Color::White);
+
+                // left_space -> left_space + gamespace_side
+                // -> generate number from 0 -> gamespace_side
+
+                
+
+                int number = left_space + (rand() % gamespace_side);
+
+                cout << number << '\n';
+
+                (*new_text).setPosition(number, up_space+1);
+
+                while (!isTextFullyInside((*new_text), GameSpaceRectangle)) {
+                    number = left_space + (rand() % gamespace_side);   
+                    cout << number << '\n';
+                    (*new_text).setPosition(number, up_space+1);
+                }
+
+                // (*new_text).setPosition(left_space, up_space);
 
                 text_list.push_back(new_text);
+
+                // cout << rand_word << '\n';
 
                 elapsedTime = Time::Zero;
             }
 
             
-            for (auto it : text_list) {
-                (*it).move(0, gameSpeed * frameTime.asSeconds());
-                window.draw(*it);
+            /// Drawing the falling words :
+
+            for (auto it = text_list.begin(); it != text_list.end();) { 
+                (*it)->move(0, gameSpeed * frameTime.asSeconds());
+
+                // if ((*it)->getPosition().y > up_space + gamespace_side) {
+                if ( !isTextFullyInside((**it), GameSpaceRectangle) ) {
+                    delete* it;
+                    it = text_list.erase(it);
+                }
+                else {
+                    window.draw(**it);
+                    ++it;
+                }
             }
+
+            text_list.shrink_to_fit();
 
         }
 
