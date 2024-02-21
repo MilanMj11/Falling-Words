@@ -15,6 +15,10 @@ int resolution_height = 1080;
 enum class AppState {
     Menu,
     PlayingSurvival,
+    PlayingEasy,
+    PlayingMedium,
+    PlayingHard,
+    PlayingExpert,
     Paused,
     Finished
 };
@@ -340,7 +344,7 @@ int main()
     /// ----------------------------------- MENU APPEARANCE --------------------------------
 
 
-    AppState currentState = AppState::PlayingSurvival;
+    AppState currentState = AppState::Menu;
     AppState lastState = AppState::Menu;
     // -> speed = words / minute
     int gameSpeed = 160;
@@ -364,10 +368,31 @@ int main()
 
                     if (currentState == AppState::PlayingSurvival) {
                         currentState = AppState::Paused;
+                        lastState = AppState::PlayingSurvival;
+                        continue;
+                    }
+                    if (currentState == AppState::PlayingEasy) {
+                        currentState = AppState::Paused;
+                        lastState = AppState::PlayingEasy;
+                        continue;
+                    }
+                    if (currentState == AppState::PlayingMedium) {
+                        currentState = AppState::Paused;
+                        lastState = AppState::PlayingMedium;
+                        continue;
+                    }
+                    if (currentState == AppState::PlayingHard) {
+                        currentState = AppState::Paused;
+                        lastState = AppState::PlayingHard;
+                        continue;
+                    }
+                    if (currentState == AppState::PlayingExpert) {
+                        currentState = AppState::Paused;
+                        lastState = AppState::PlayingExpert;
                         continue;
                     }
                     if (currentState == AppState::Paused) {
-                        currentState = AppState::PlayingSurvival;
+                        currentState = lastState;
                         continue;
                     }
 
@@ -385,7 +410,7 @@ int main()
 
                     if (continueBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
                     {
-                        currentState = AppState::PlayingSurvival;
+                        currentState = lastState;
                         continue;
                     }
                     if (retryBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
@@ -395,16 +420,51 @@ int main()
                             it = text_list.erase(it);
                         }
                         text_list.clear();
-                        currentState = AppState::PlayingSurvival; /// return to the last game mode You've been playing !
+                        currentState = lastState; /// return to the last game mode You've been playing !
                         continue;
                     }
                     if (exitBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
                     {
+                        for (auto it = text_list.begin(); it != text_list.end();) {
+                            delete* it;
+                            it = text_list.erase(it);
+                        }
+                        text_list.clear();
                         currentState = AppState::Menu;
                         continue;
                     }
 
+                    continue; /// !!! CAREFUL ON THIS 
+                }
 
+                if (currentState == AppState::Menu) {
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                    sf::FloatRect survivalBounds = SurvivalButton.getGlobalBounds();
+                    sf::FloatRect easyBounds = EasyButton.getGlobalBounds();
+                    sf::FloatRect mediumBounds = MediumButton.getGlobalBounds();
+                    sf::FloatRect hardBounds = HardButton.getGlobalBounds();
+                    sf::FloatRect expertBounds = ExpertButton.getGlobalBounds();
+
+                    if (survivalBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))){
+                        currentState = AppState::PlayingSurvival;
+                        continue;
+                    }
+                    if (easyBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
+                        currentState = AppState::PlayingEasy;
+                        continue;
+                    }
+                    if (mediumBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
+                        currentState = AppState::PlayingMedium;
+                        continue;
+                    }
+                    if (hardBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
+                        currentState = AppState::PlayingHard;
+                        continue;
+                    }
+                    if (expertBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
+                        currentState = AppState::PlayingExpert;
+                        continue;
+                    }
                 }
 
             }
@@ -464,6 +524,8 @@ int main()
         }
 
         if (currentState == AppState::Menu) {
+
+            clock.restart();
             window.draw(WELCOME);
             window.draw(SurvivalButton);
             window.draw(EasyButton);
