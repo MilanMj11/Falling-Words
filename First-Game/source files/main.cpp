@@ -4,6 +4,8 @@
 #include <random>
 #include <thread>
 #include <chrono>
+#include <iomanip>
+#include <sstream>
 #include <SFML/Graphics.hpp>
 
 using namespace std;
@@ -66,7 +68,7 @@ void create_words_list() {
 string get_random_word() {
 
     int totalWords = 10000;
-    
+
     std::random_device rd;
     std::mt19937 gen(rd());
 
@@ -88,7 +90,7 @@ bool isTextFullyInside(const sf::Text& text, const sf::RectangleShape& rectangle
         textBounds.top + textBounds.height <= rectangleBounds.top + rectangleBounds.height;
 }
 
-void generate_and_push_word(Font& font,int font_size,Color color) {
+void generate_and_push_word(Font& font, int font_size, Color color) {
 
     string rand_word = get_random_word();
 
@@ -119,7 +121,7 @@ void generate_and_push_word(Font& font,int font_size,Color color) {
 
 void centerTextInRectangle(Text& text, RectangleShape rectangle) {
     sf::Vector2f textCenter(rectangle.getPosition().x + rectangle.getSize().x / 2.0f,
-                                rectangle.getPosition().y + rectangle.getSize().y / 2.0f);
+        rectangle.getPosition().y + rectangle.getSize().y / 2.0f);
     sf::FloatRect textBounds = text.getLocalBounds();
     text.setOrigin(textBounds.left + textBounds.width / 2.0f, textBounds.top + textBounds.height / 2.0f);
     text.setPosition(textCenter);
@@ -149,7 +151,7 @@ int main()
         cout << "Error loading";
         return 0;
     }
-    IntRect imageRect(0, 0, 3.5*gamespace_side, 3.5*gamespace_side);
+    IntRect imageRect(0, 0, 3.5 * gamespace_side, 3.5 * gamespace_side);
 
     GameSpaceRectangle.setTexture(&backgroundTexture);
     GameSpaceRectangle.setTextureRect(imageRect);
@@ -196,7 +198,7 @@ int main()
     RectangleShape RetryButton(Vector2f(paused_button_width, paused_button_height));
     RectangleShape ExitButton(Vector2f(paused_button_width, paused_button_height));
 
-    Text CONTINUE,RETRY,EXIT;
+    Text CONTINUE, RETRY, EXIT;
     CONTINUE.setFont(words_font);
     RETRY.setFont(words_font);
     EXIT.setFont(words_font);
@@ -231,13 +233,13 @@ int main()
     /// I'm aware it could have been done in an easier manner;
 
     sf::Vector2f ContinueCenter(ContinueButton.getPosition().x + ContinueButton.getSize().x / 2.0f,
-                                ContinueButton.getPosition().y + ContinueButton.getSize().y / 2.0f);
+        ContinueButton.getPosition().y + ContinueButton.getSize().y / 2.0f);
 
     sf::Vector2f RetryCenter(RetryButton.getPosition().x + RetryButton.getSize().x / 2.0f,
-                             RetryButton.getPosition().y + RetryButton.getSize().y / 2.0f);
+        RetryButton.getPosition().y + RetryButton.getSize().y / 2.0f);
 
     sf::Vector2f ExitCenter(ExitButton.getPosition().x + ExitButton.getSize().x / 2.0f,
-                            ExitButton.getPosition().y + ExitButton.getSize().y / 2.0f);
+        ExitButton.getPosition().y + ExitButton.getSize().y / 2.0f);
 
     sf::FloatRect continueBounds = CONTINUE.getLocalBounds();
     CONTINUE.setOrigin(continueBounds.left + continueBounds.width / 2.0f, continueBounds.top + continueBounds.height / 2.0f);
@@ -250,7 +252,7 @@ int main()
     RETRY.setPosition(RetryCenter);
     EXIT.setPosition(ExitCenter);
 
-    
+
 
     /// ----------------------------------- PAUSED APPEARANCE --------------------------------
 
@@ -316,8 +318,8 @@ int main()
     EXPERT.setFont(words_font);
     set_SizeColorString_of_Text(EXPERT, 50, Color::Red, "EXPERT");
     centerTextInRectangle(EXPERT, ExpertButton);
-    
-    
+
+
     Text HighScoreSurvival, HighScoreEasy, HighScoreMedium, HighScoreHard, HighScoreExpert;
     HighScoreSurvival.setFont(words_font);
     set_SizeColorString_of_Text(HighScoreSurvival, 50, Color::White, "-> HIGH SCORE:");
@@ -343,16 +345,40 @@ int main()
 
     /// ----------------------------------- MENU APPEARANCE --------------------------------
 
+    /// ---------------------------------- SCOREBOARD APPEARANCE ----------------------------
+
+
+    int gameSpeed = 160;
+    int currentGameScore = 0;
+    int currentGameSpeed = 0;
+    float currentGameTimeSpent = 0;
+    float totalGameTimeSpent = 0;
+
+    Clock gameClock;
+    Clock clock;
+    Time elapsedTime;
+    Time gameClockPauseTime;
+
+    Text secondsPassedText;
+    Font numbersFont;
+    if (!numbersFont.loadFromFile("assets/Nexa-Heavy.ttf")) {
+        cout << "Erorr loading numbers font!";
+        return 0;
+    }
+    secondsPassedText.setFont(numbersFont);
+    secondsPassedText.setPosition(0, 0);
+    secondsPassedText.setFillColor(Color::White);
+    secondsPassedText.setString("0.00s");
+    secondsPassedText.setCharacterSize(50);
+
+    /// ---------------------------------- SCOREBOARD APPEARANCE ----------------------------
 
     AppState currentState = AppState::Menu;
     AppState lastState = AppState::Menu;
     // -> speed = words / minute
-    int gameSpeed = 160;
 
-    Clock clock;
-    Time elapsedTime;
 
-    RenderWindow window(VideoMode(resolution_width, resolution_height), "Works!");
+    RenderWindow window(VideoMode(resolution_width, resolution_height), "Falling Words");
     string currentInput;
 
     while (window.isOpen())
@@ -402,7 +428,7 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed and event.mouseButton.button == sf::Mouse::Left) {
 
                 if (currentState == AppState::Paused) {
-                    
+
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                     sf::FloatRect continueBounds = ContinueButton.getGlobalBounds();
                     sf::FloatRect retryBounds = RetryButton.getGlobalBounds();
@@ -421,6 +447,8 @@ int main()
                         }
                         text_list.clear();
                         currentState = lastState; /// return to the last game mode You've been playing !
+                        currentGameTimeSpent = 0;
+                        totalGameTimeSpent = 0;
                         continue;
                     }
                     if (exitBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
@@ -438,6 +466,7 @@ int main()
                 }
 
                 if (currentState == AppState::Menu) {
+
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
                     sf::FloatRect survivalBounds = SurvivalButton.getGlobalBounds();
                     sf::FloatRect easyBounds = EasyButton.getGlobalBounds();
@@ -445,8 +474,9 @@ int main()
                     sf::FloatRect hardBounds = HardButton.getGlobalBounds();
                     sf::FloatRect expertBounds = ExpertButton.getGlobalBounds();
 
-                    if (survivalBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))){
+                    if (survivalBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
                         currentState = AppState::PlayingSurvival;
+                        gameClock.restart();
                         continue;
                     }
                     if (easyBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
@@ -479,14 +509,27 @@ int main()
 
             window.draw(GameSpaceRectangle);
             window.draw(ScoreDetailsRectangle);
+            window.draw(secondsPassedText);
 
             Time frameTime = clock.restart();
             elapsedTime += frameTime;
 
+            Time elapsed = gameClock.getElapsedTime();
+            float seconds = elapsed.asSeconds();
+
+            currentGameTimeSpent = seconds;
+
+            std::ostringstream ss;
+            ss << std::fixed << std::setprecision(2) << totalGameTimeSpent + currentGameTimeSpent;
+
+            // cout << currentGameTimeSpent << '\n';
+            // works fine
+
+            secondsPassedText.setString(ss.str() + "s");
 
             if (elapsedTime.asSeconds() >= 1.0f) { /// Every second we generate a new word to print
 
-                generate_and_push_word(words_font,20,Color::White);
+                generate_and_push_word(words_font, 20, Color::White);
 
                 elapsedTime = Time::Zero;
             }
@@ -497,7 +540,7 @@ int main()
                 (*it)->move(0, gameSpeed * frameTime.asSeconds());
 
                 // if ((*it)->getPosition().y > up_space + gamespace_side) {
-                if ( !isTextFullyInside((**it), GameSpaceRectangle) ) {
+                if (!isTextFullyInside((**it), GameSpaceRectangle)) {
                     delete* it;
                     it = text_list.erase(it);
                 }
@@ -513,7 +556,10 @@ int main()
 
         if (currentState == AppState::Paused) { /// CAN PAUSE PRESSING ESC
 
+            totalGameTimeSpent += currentGameTimeSpent;
+            currentGameTimeSpent = 0;
             clock.restart();
+            gameClock.restart();
             window.draw(ContinueButton);
             window.draw(RetryButton);
             window.draw(ExitButton);
@@ -521,11 +567,20 @@ int main()
             window.draw(CONTINUE);
             window.draw(RETRY);
             window.draw(EXIT);
-        }
+        } 
 
         if (currentState == AppState::Menu) {
 
+            totalGameTimeSpent = 0;
+            
+            gameClock.restart();
+            // gameClockPauseTime = gameClock.getElapsedTime();
             clock.restart();
+
+            currentGameScore = 0;
+            currentGameSpeed = 0;
+            currentGameTimeSpent = 0;
+
             window.draw(WELCOME);
             window.draw(SurvivalButton);
             window.draw(EasyButton);
