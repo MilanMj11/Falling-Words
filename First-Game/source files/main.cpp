@@ -314,6 +314,28 @@ int main()
     centerTextInRectangle(EXPERT, ExpertButton);
     
     
+    Text HighScoreSurvival, HighScoreEasy, HighScoreMedium, HighScoreHard, HighScoreExpert;
+    HighScoreSurvival.setFont(words_font);
+    set_SizeColorString_of_Text(HighScoreSurvival, 50, Color::White, "-> HIGH SCORE:");
+    HighScoreEasy = HighScoreSurvival;
+    HighScoreMedium = HighScoreSurvival;
+    HighScoreHard = HighScoreSurvival;
+    HighScoreExpert = HighScoreSurvival;
+
+
+    sf::FloatRect highscoreBounds = HighScoreSurvival.getLocalBounds();
+    HighScoreSurvival.setOrigin(highscoreBounds.left + highscoreBounds.width / 2.0f, highscoreBounds.top + highscoreBounds.height / 2.0f);
+    HighScoreEasy.setOrigin(highscoreBounds.left + highscoreBounds.width / 2.0f, highscoreBounds.top + highscoreBounds.height / 2.0f);
+    HighScoreMedium.setOrigin(highscoreBounds.left + highscoreBounds.width / 2.0f, highscoreBounds.top + highscoreBounds.height / 2.0f);
+    HighScoreHard.setOrigin(highscoreBounds.left + highscoreBounds.width / 2.0f, highscoreBounds.top + highscoreBounds.height / 2.0f);
+    HighScoreExpert.setOrigin(highscoreBounds.left + highscoreBounds.width / 2.0f, highscoreBounds.top + highscoreBounds.height / 2.0f);
+
+    HighScoreSurvival.setPosition(SURVIVAL.getPosition().x + resolution_width * 25 / 100, SURVIVAL.getPosition().y);
+    HighScoreEasy.setPosition(EASY.getPosition().x + resolution_width * 25 / 100, EASY.getPosition().y);
+    HighScoreMedium.setPosition(MEDIUM.getPosition().x + resolution_width * 25 / 100, MEDIUM.getPosition().y);
+    HighScoreHard.setPosition(HARD.getPosition().x + resolution_width * 25 / 100, HARD.getPosition().y);
+    HighScoreExpert.setPosition(EXPERT.getPosition().x + resolution_width * 25 / 100, EXPERT.getPosition().y);
+
 
     /// ----------------------------------- MENU APPEARANCE --------------------------------
 
@@ -454,6 +476,12 @@ int main()
             window.draw(MEDIUM);
             window.draw(HARD);
             window.draw(EXPERT);
+
+            window.draw(HighScoreSurvival);
+            window.draw(HighScoreEasy);
+            window.draw(HighScoreMedium);
+            window.draw(HighScoreHard);
+            window.draw(HighScoreExpert);
         }
 
         /// ----------------------- DRAW ----------------------------
