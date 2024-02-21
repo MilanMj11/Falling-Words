@@ -353,10 +353,14 @@ int main()
     int currentGameSpeed = 0;
     float currentGameTimeSpent = 0;
     float totalGameTimeSpent = 0;
+    float gameSpawnRate = 1.0;
+    float finalGameTime = 0;
+    int currentGameLifes = 3;
 
     Clock gameClock;
     Clock clock;
     Time elapsedTime;
+    Time secondCountertime;
     Time gameClockPauseTime;
 
     Text secondsPassedText;
@@ -369,7 +373,7 @@ int main()
     secondsPassedText.setPosition(0, 0);
     secondsPassedText.setFillColor(Color::White);
     secondsPassedText.setString("0.00s");
-    secondsPassedText.setCharacterSize(50);
+    secondsPassedText.setCharacterSize(35);
 
     /// ---------------------------------- SCOREBOARD APPEARANCE ----------------------------
 
@@ -449,6 +453,8 @@ int main()
                         currentState = lastState; /// return to the last game mode You've been playing !
                         currentGameTimeSpent = 0;
                         totalGameTimeSpent = 0;
+                        gameSpawnRate = 1.0;
+                        currentGameLifes = 3;
                         continue;
                     }
                     if (exitBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
@@ -505,6 +511,20 @@ int main()
 
         /// ----------------------- DRAW ----------------------------
 
+        /// scoreboard 
+
+        if (currentState == AppState::PlayingSurvival or currentState == AppState::PlayingEasy
+            or currentState == AppState::PlayingMedium or currentState == AppState::PlayingHard
+            or currentState == AppState::PlayingExpert) {
+
+            /// I want to display the scoreboard with it's stats:
+
+            /// the red rectangle is the location of all the information
+            /// ScoreDetailsRectangle
+        }
+
+        /// scoreboard
+
         if (currentState == AppState::PlayingSurvival) {
 
             window.draw(GameSpaceRectangle);
@@ -513,6 +533,7 @@ int main()
 
             Time frameTime = clock.restart();
             elapsedTime += frameTime;
+            secondCountertime += frameTime;
 
             Time elapsed = gameClock.getElapsedTime();
             float seconds = elapsed.asSeconds();
@@ -527,7 +548,15 @@ int main()
 
             secondsPassedText.setString(ss.str() + "s");
 
-            if (elapsedTime.asSeconds() >= 1.0f) { /// Every second we generate a new word to print
+
+            if (secondCountertime.asSeconds() >= 1.0) {
+
+                /// -0.005 is the good time;
+                gameSpawnRate -= 0.005;
+                secondCountertime = Time::Zero;
+            }
+
+            if (elapsedTime.asSeconds() >= gameSpawnRate) { /// Every second we generate a new word to print
 
                 generate_and_push_word(words_font, 20, Color::White);
 
@@ -543,6 +572,7 @@ int main()
                 if (!isTextFullyInside((**it), GameSpaceRectangle)) {
                     delete* it;
                     it = text_list.erase(it);
+                    currentGameLifes--;
                 }
                 else {
                     window.draw(**it);
@@ -551,6 +581,12 @@ int main()
             }
 
             text_list.shrink_to_fit();
+
+            if (currentGameLifes <= 0) {
+                finalGameTime = totalGameTimeSpent + currentGameTimeSpent;
+                currentState = AppState::Finished;
+                lastState = AppState::PlayingSurvival;
+            }
 
         }
 
@@ -572,7 +608,10 @@ int main()
         if (currentState == AppState::Menu) {
 
             totalGameTimeSpent = 0;
-            
+            gameSpawnRate = 1.0;
+            currentGameLifes = 3;
+
+
             gameClock.restart();
             // gameClockPauseTime = gameClock.getElapsedTime();
             clock.restart();
@@ -599,6 +638,10 @@ int main()
             window.draw(HighScoreMedium);
             window.draw(HighScoreHard);
             window.draw(HighScoreExpert);
+        }
+
+        if (currentState == AppState::Finished) {
+            /// I will display the scores + STATS;
         }
 
         /// ----------------------- DRAW ----------------------------
