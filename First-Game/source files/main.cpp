@@ -115,7 +115,7 @@ void generate_and_push_word(Font& font,int font_size,Color color) {
 int main()
 {
 
-    /// ----------------------------------- APPEARANCE --------------------------------
+    /// ----------------------------------- GAME APPEARANCE --------------------------------
 
     gamespace_side = resolution_height * 70 / 100;
     left_space = (resolution_width - gamespace_side) / 2;
@@ -142,7 +142,7 @@ int main()
     ScoreDetailsRectangle.setFillColor(Color::Red);
     ScoreDetailsRectangle.setPosition(Vector2f(left_space * 25 / 100, up_space));
 
-    /// ----------------------------------- APPEARANCE --------------------------------
+    /// ----------------------------------- GAME APPEARANCE --------------------------------
 
 
     /// --------------------------------- GENERATING WORDS -------------------------------------
@@ -156,8 +156,83 @@ int main()
         return 0;
     }
 
-
     /// --------------------------------- GENERATING WORDS -------------------------------------
+
+
+    /// ----------------------------------- PAUSED APPEARANCE --------------------------------
+
+    Text PAUSED;
+    PAUSED.setFont(words_font);
+    PAUSED.setCharacterSize(145);
+    PAUSED.setFillColor(Color::White);
+    PAUSED.setString("P A U S E D");
+    FloatRect pausedBounds = PAUSED.getLocalBounds();
+    PAUSED.setOrigin(pausedBounds.left + pausedBounds.width / 2.0f, pausedBounds.top + pausedBounds.height / 2.0f);
+    PAUSED.setPosition(resolution_width / 2.0f, resolution_height * 10 / 100);
+
+    int button_width = resolution_width * 30 / 100;
+    int button_height = resolution_height * 15 / 100;
+
+    RectangleShape ContinueButton(Vector2f(button_width, button_height));
+    RectangleShape RetryButton(Vector2f(button_width, button_height));
+    RectangleShape ExitButton(Vector2f(button_width, button_height));
+
+    Text CONTINUE,RETRY,EXIT;
+    CONTINUE.setFont(words_font);
+    RETRY.setFont(words_font);
+    EXIT.setFont(words_font);
+
+    CONTINUE.setCharacterSize(70);
+    CONTINUE.setFillColor(Color::White);
+    CONTINUE.setString("CONTINUE");
+    RETRY.setCharacterSize(70);
+    RETRY.setFillColor(Color::White);
+    RETRY.setString("RETRY");
+    EXIT.setCharacterSize(70);
+    EXIT.setFillColor(Color::White);
+    EXIT.setString("EXIT");
+
+    ContinueButton.setOutlineThickness(2);
+    ContinueButton.setOutlineColor(Color::White);
+    ContinueButton.setFillColor(Color::Black);
+    ContinueButton.setPosition(resolution_width * 35 / 100, resolution_height * 25 / 100);
+
+
+    RetryButton.setOutlineThickness(2);
+    RetryButton.setOutlineColor(Color::White);
+    RetryButton.setFillColor(Color::Black);
+    RetryButton.setPosition(resolution_width * 35 / 100, resolution_height * 47 / 100);
+
+
+    ExitButton.setOutlineThickness(2);
+    ExitButton.setOutlineColor(Color::White);
+    ExitButton.setFillColor(Color::Black);
+    ExitButton.setPosition(resolution_width * 35 / 100, resolution_height * 69 / 100);
+
+    sf::Vector2f ContinueCenter(ContinueButton.getPosition().x + ContinueButton.getSize().x / 2.0f,
+                                ContinueButton.getPosition().y + ContinueButton.getSize().y / 2.0f);
+
+    sf::Vector2f RetryCenter(RetryButton.getPosition().x + RetryButton.getSize().x / 2.0f,
+                             RetryButton.getPosition().y + RetryButton.getSize().y / 2.0f);
+
+    sf::Vector2f ExitCenter(ExitButton.getPosition().x + ExitButton.getSize().x / 2.0f,
+                            ExitButton.getPosition().y + ExitButton.getSize().y / 2.0f);
+
+    sf::FloatRect continueBounds = CONTINUE.getLocalBounds();
+    CONTINUE.setOrigin(continueBounds.left + continueBounds.width / 2.0f, continueBounds.top + continueBounds.height / 2.0f);
+    sf::FloatRect retryBounds = RETRY.getLocalBounds();
+    RETRY.setOrigin(retryBounds.left + retryBounds.width / 2.0f, retryBounds.top + retryBounds.height / 2.0f);
+    sf::FloatRect exitBounds = EXIT.getLocalBounds();
+    EXIT.setOrigin(exitBounds.left + exitBounds.width / 2.0f, exitBounds.top + exitBounds.height / 2.0f);
+
+    CONTINUE.setPosition(ContinueCenter);
+    RETRY.setPosition(RetryCenter);
+    EXIT.setPosition(ExitCenter);
+
+    
+
+    /// ----------------------------------- PAUSED APPEARANCE --------------------------------
+
 
     AppState currentState = AppState::PlayingSurvival;
     // -> speed = words / minute
@@ -237,9 +312,13 @@ int main()
         if (currentState == AppState::Paused) { /// CAN PAUSE PRESSING ESC
 
             clock.restart();
-            window.draw(GameSpaceRectangle);
-            window.draw(ScoreDetailsRectangle);
-
+            window.draw(ContinueButton);
+            window.draw(RetryButton);
+            window.draw(ExitButton);
+            window.draw(PAUSED);
+            window.draw(CONTINUE);
+            window.draw(RETRY);
+            window.draw(EXIT);
         }
 
         /// ----------------------- DRAW ----------------------------
