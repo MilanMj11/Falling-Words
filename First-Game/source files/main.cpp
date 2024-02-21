@@ -2,6 +2,8 @@
 #include <fstream>
 #include <string.h>
 #include <random>
+#include <thread>
+#include <chrono>
 #include <SFML/Graphics.hpp>
 
 using namespace std;
@@ -111,6 +113,19 @@ void generate_and_push_word(Font& font,int font_size,Color color) {
 
 }
 
+void centerTextInRectangle(Text& text, RectangleShape rectangle) {
+    sf::Vector2f textCenter(rectangle.getPosition().x + rectangle.getSize().x / 2.0f,
+                                rectangle.getPosition().y + rectangle.getSize().y / 2.0f);
+    sf::FloatRect textBounds = text.getLocalBounds();
+    text.setOrigin(textBounds.left + textBounds.width / 2.0f, textBounds.top + textBounds.height / 2.0f);
+    text.setPosition(textCenter);
+}
+
+void set_SizeColorString_of_Text(Text& text, int fontsize, Color color, string str) {
+    text.setCharacterSize(fontsize);
+    text.setFillColor(color);
+    text.setString(str);
+}
 
 int main()
 {
@@ -163,19 +178,19 @@ int main()
 
     Text PAUSED;
     PAUSED.setFont(words_font);
-    PAUSED.setCharacterSize(145);
+    PAUSED.setCharacterSize(150);
     PAUSED.setFillColor(Color::White);
     PAUSED.setString("P A U S E D");
     FloatRect pausedBounds = PAUSED.getLocalBounds();
     PAUSED.setOrigin(pausedBounds.left + pausedBounds.width / 2.0f, pausedBounds.top + pausedBounds.height / 2.0f);
     PAUSED.setPosition(resolution_width / 2.0f, resolution_height * 10 / 100);
 
-    int button_width = resolution_width * 30 / 100;
-    int button_height = resolution_height * 15 / 100;
+    int paused_button_width = resolution_width * 30 / 100;
+    int paused_button_height = resolution_height * 15 / 100;
 
-    RectangleShape ContinueButton(Vector2f(button_width, button_height));
-    RectangleShape RetryButton(Vector2f(button_width, button_height));
-    RectangleShape ExitButton(Vector2f(button_width, button_height));
+    RectangleShape ContinueButton(Vector2f(paused_button_width, paused_button_height));
+    RectangleShape RetryButton(Vector2f(paused_button_width, paused_button_height));
+    RectangleShape ExitButton(Vector2f(paused_button_width, paused_button_height));
 
     Text CONTINUE,RETRY,EXIT;
     CONTINUE.setFont(words_font);
@@ -209,6 +224,8 @@ int main()
     ExitButton.setFillColor(Color::Black);
     ExitButton.setPosition(resolution_width * 35 / 100, resolution_height * 69 / 100);
 
+    /// I'm aware it could have been done in an easier manner;
+
     sf::Vector2f ContinueCenter(ContinueButton.getPosition().x + ContinueButton.getSize().x / 2.0f,
                                 ContinueButton.getPosition().y + ContinueButton.getSize().y / 2.0f);
 
@@ -234,7 +251,75 @@ int main()
     /// ----------------------------------- PAUSED APPEARANCE --------------------------------
 
 
+    /// ----------------------------------- MENU APPEARANCE --------------------------------
+
+    Text WELCOME;
+    WELCOME.setFont(words_font);
+    WELCOME.setCharacterSize(150);
+    WELCOME.setFillColor(Color::White);
+    WELCOME.setString("WELCOME");
+    FloatRect welcomeBounds = WELCOME.getLocalBounds();
+    WELCOME.setOrigin(welcomeBounds.left + welcomeBounds.width / 2.0f, welcomeBounds.top + welcomeBounds.height / 2.0f);
+    WELCOME.setPosition(resolution_width / 2.0f, resolution_height * 10 / 100);
+
+    int menu_button_width = resolution_width * 25 / 100;
+    int menu_button_height = resolution_height * 10 / 100;
+
+    RectangleShape MenuButtonShape(Vector2f(menu_button_width, menu_button_height));
+    MenuButtonShape.setFillColor(Color::Black);
+    MenuButtonShape.setOutlineColor(Color::White);
+    MenuButtonShape.setOutlineThickness(2);
+
+
+    RectangleShape SurvivalButton = MenuButtonShape;
+    RectangleShape EasyButton = MenuButtonShape;
+    RectangleShape MediumButton = MenuButtonShape;
+    RectangleShape HardButton = MenuButtonShape;
+    RectangleShape ExpertButton = MenuButtonShape;
+
+    SurvivalButton.setPosition(resolution_width * 5 / 100, resolution_height * 25 / 100);
+    EasyButton.setPosition(resolution_width * 5 / 100, resolution_height * 40 / 100);
+    MediumButton.setPosition(resolution_width * 5 / 100, resolution_height * 55 / 100);
+    HardButton.setPosition(resolution_width * 5 / 100, resolution_height * 70 / 100);
+    ExpertButton.setPosition(resolution_width * 5 / 100, resolution_height * 85 / 100);
+
+    sf::Color orangeColor(255, 165, 0);
+
+    SurvivalButton.setOutlineColor(Color::Cyan);
+    EasyButton.setOutlineColor(Color::Green);
+    MediumButton.setOutlineColor(Color::Yellow);
+    HardButton.setOutlineColor(orangeColor);
+    ExpertButton.setOutlineColor(Color::Red);
+
+    Text GameModesText, SURVIVAL, EASY, MEDIUM, HARD, EXPERT;
+
+    SURVIVAL.setFont(words_font);
+    set_SizeColorString_of_Text(SURVIVAL, 50, Color::Cyan, "SURVIVAL");
+    centerTextInRectangle(SURVIVAL, SurvivalButton);
+
+    EASY.setFont(words_font);
+    set_SizeColorString_of_Text(EASY, 50, Color::Green, "EASY");
+    centerTextInRectangle(EASY, EasyButton);
+
+    MEDIUM.setFont(words_font);
+    set_SizeColorString_of_Text(MEDIUM, 50, Color::Yellow, "MEDIUM");
+    centerTextInRectangle(MEDIUM, MediumButton);
+
+    HARD.setFont(words_font);
+    set_SizeColorString_of_Text(HARD, 50, orangeColor, "HARD");
+    centerTextInRectangle(HARD, HardButton);
+
+    EXPERT.setFont(words_font);
+    set_SizeColorString_of_Text(EXPERT, 50, Color::Red, "EXPERT");
+    centerTextInRectangle(EXPERT, ExpertButton);
+    
+    
+
+    /// ----------------------------------- MENU APPEARANCE --------------------------------
+
+
     AppState currentState = AppState::PlayingSurvival;
+    AppState lastState = AppState::Menu;
     // -> speed = words / minute
     int gameSpeed = 160;
 
@@ -265,6 +350,41 @@ int main()
                     }
 
                 }
+            }
+
+            if (event.type == sf::Event::MouseButtonPressed and event.mouseButton.button == sf::Mouse::Left) {
+
+                if (currentState == AppState::Paused) {
+                    
+                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                    sf::FloatRect continueBounds = ContinueButton.getGlobalBounds();
+                    sf::FloatRect retryBounds = RetryButton.getGlobalBounds();
+                    sf::FloatRect exitBounds = ExitButton.getGlobalBounds();
+
+                    if (continueBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+                    {
+                        currentState = AppState::PlayingSurvival;
+                        continue;
+                    }
+                    if (retryBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+                    {
+                        for (auto it = text_list.begin(); it != text_list.end();) {
+                            delete* it;
+                            it = text_list.erase(it);
+                        }
+                        text_list.clear();
+                        currentState = AppState::PlayingSurvival; /// return to the last game mode You've been playing !
+                        continue;
+                    }
+                    if (exitBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+                    {
+                        currentState = AppState::Menu;
+                        continue;
+                    }
+
+
+                }
+
             }
 
         }
@@ -319,6 +439,21 @@ int main()
             window.draw(CONTINUE);
             window.draw(RETRY);
             window.draw(EXIT);
+        }
+
+        if (currentState == AppState::Menu) {
+            window.draw(WELCOME);
+            window.draw(SurvivalButton);
+            window.draw(EasyButton);
+            window.draw(MediumButton);
+            window.draw(HardButton);
+            window.draw(ExpertButton);
+
+            window.draw(SURVIVAL);
+            window.draw(EASY);
+            window.draw(MEDIUM);
+            window.draw(HARD);
+            window.draw(EXPERT);
         }
 
         /// ----------------------- DRAW ----------------------------
