@@ -160,7 +160,9 @@ int main()
     scoreheight = gamespace_side;
 
     ScoreDetailsRectangle.setSize(Vector2f(scorewidth, scoreheight));
-    ScoreDetailsRectangle.setFillColor(Color::Red);
+    ScoreDetailsRectangle.setFillColor(Color::Black);
+    ScoreDetailsRectangle.setOutlineColor(Color::White);
+    ScoreDetailsRectangle.setOutlineThickness(2);
     ScoreDetailsRectangle.setPosition(Vector2f(left_space * 25 / 100, up_space));
 
     /// ----------------------------------- GAME APPEARANCE --------------------------------
@@ -345,7 +347,7 @@ int main()
 
     /// ----------------------------------- MENU APPEARANCE --------------------------------
 
-    /// ---------------------------------- SCOREBOARD APPEARANCE ----------------------------
+    /// ---------------------------------- SCOREBOARD INFO ----------------------------
 
 
     int gameSpeed = 160;
@@ -370,10 +372,49 @@ int main()
         return 0;
     }
     secondsPassedText.setFont(numbersFont);
-    secondsPassedText.setPosition(0, 0);
+    // secondsPassedText.setPosition(0, 0);
     secondsPassedText.setFillColor(Color::White);
     secondsPassedText.setString("0.00s");
     secondsPassedText.setCharacterSize(35);
+
+    centerTextInRectangle(secondsPassedText, ScoreDetailsRectangle);
+    secondsPassedText.setPosition(secondsPassedText.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 15 / 100);
+
+    /// ---------------------------------- SCOREBOARD INFO ----------------------------
+
+    /// ---------------------------------- SCOREBOARD APPEARANCE ----------------------------
+
+    Text SCOREBOARD;
+    SCOREBOARD.setFont(words_font);
+    SCOREBOARD.setCharacterSize(35);
+    SCOREBOARD.setFillColor(Color::White);
+    SCOREBOARD.setString("SCOREBOARD");
+    centerTextInRectangle(SCOREBOARD, ScoreDetailsRectangle);
+    SCOREBOARD.setPosition(SCOREBOARD.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 5 / 100);
+
+    Text WordsPerMinute = SCOREBOARD;
+    WordsPerMinute.setString("WORDS PER MINUTE");
+    centerTextInRectangle(WordsPerMinute, ScoreDetailsRectangle);
+    WordsPerMinute.setPosition(WordsPerMinute.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 25 / 100);
+
+    Text ACCURACY = SCOREBOARD;
+    ACCURACY.setString("ACCURACY");
+    centerTextInRectangle(ACCURACY, ScoreDetailsRectangle);
+    ACCURACY.setPosition(ACCURACY.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 45 / 100);
+
+    Text RANK = SCOREBOARD;
+    RANK.setString("RANK");
+    centerTextInRectangle(RANK, ScoreDetailsRectangle);
+    RANK.setPosition(RANK.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 65 / 100);
+
+    Text WPM;
+    WPM.setFont(numbersFont);
+    WPM.setCharacterSize(35);
+    WPM.setFillColor(Color::White);
+    WPM.setString("0 WPM");
+    centerTextInRectangle(WPM, ScoreDetailsRectangle);
+    WPM.setPosition(WPM.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 35 / 100);
+
 
     /// ---------------------------------- SCOREBOARD APPEARANCE ----------------------------
 
@@ -425,7 +466,10 @@ int main()
                         currentState = lastState;
                         continue;
                     }
-
+                    if (currentState == AppState::Finished) {
+                        currentState = AppState::Menu;
+                        continue;
+                    }
                 }
             }
 
@@ -511,7 +555,8 @@ int main()
 
         /// ----------------------- DRAW ----------------------------
 
-        /// scoreboard 
+        
+         /// scoreboard 
 
         if (currentState == AppState::PlayingSurvival or currentState == AppState::PlayingEasy
             or currentState == AppState::PlayingMedium or currentState == AppState::PlayingHard
@@ -519,17 +564,25 @@ int main()
 
             /// I want to display the scoreboard with it's stats:
 
+            window.draw(GameSpaceRectangle);
+            window.draw(ScoreDetailsRectangle);
+
+            window.draw(SCOREBOARD);
+            window.draw(WordsPerMinute);
+            window.draw(ACCURACY);
+            window.draw(RANK);
+
             /// the red rectangle is the location of all the information
             /// ScoreDetailsRectangle
         }
 
         /// scoreboard
 
+
         if (currentState == AppState::PlayingSurvival) {
 
-            window.draw(GameSpaceRectangle);
-            window.draw(ScoreDetailsRectangle);
             window.draw(secondsPassedText);
+            window.draw(WPM);
 
             Time frameTime = clock.restart();
             elapsedTime += frameTime;
@@ -543,10 +596,12 @@ int main()
             std::ostringstream ss;
             ss << std::fixed << std::setprecision(2) << totalGameTimeSpent + currentGameTimeSpent;
 
-            // cout << currentGameTimeSpent << '\n';
-            // works fine
-
             secondsPassedText.setString(ss.str() + "s");
+
+            // --------------------------------------------
+
+            int wpm_nr = 60.0 / gameSpawnRate;
+            WPM.setString(to_string(wpm_nr) + " WPM");
 
 
             if (secondCountertime.asSeconds() >= 1.0) {
@@ -572,7 +627,7 @@ int main()
                 if (!isTextFullyInside((**it), GameSpaceRectangle)) {
                     delete* it;
                     it = text_list.erase(it);
-                    currentGameLifes--;
+                    //currentGameLifes--;
                 }
                 else {
                     window.draw(**it);
@@ -589,6 +644,8 @@ int main()
             }
 
         }
+
+       
 
         if (currentState == AppState::Paused) { /// CAN PAUSE PRESSING ESC
 
