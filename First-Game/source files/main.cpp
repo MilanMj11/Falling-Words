@@ -418,6 +418,23 @@ int main()
 
     /// ---------------------------------- SCOREBOARD APPEARANCE ----------------------------
 
+    /// ----------------------------------- HEARTS -------------------------------------
+    
+    int heartSize = 50;
+
+    RectangleShape heart1(Vector2f(heartSize, heartSize));
+    heart1.setPosition(0, 0);
+    
+    Texture heartTexture;
+    heartTexture.loadFromFile("assets/heart2.png");
+    Sprite heartSprite(heartTexture);
+
+    heartSprite.setPosition(0, 0);
+    heartSprite.setScale(2, 2);
+
+
+    /// ----------------------------------- HEARTS -------------------------------------
+
     AppState currentState = AppState::Menu;
     AppState lastState = AppState::Menu;
     // -> speed = words / minute
@@ -572,6 +589,7 @@ int main()
             window.draw(ACCURACY);
             window.draw(RANK);
 
+            window.draw(heartSprite);
             /// the red rectangle is the location of all the information
             /// ScoreDetailsRectangle
         }
