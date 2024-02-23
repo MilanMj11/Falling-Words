@@ -33,6 +33,11 @@ int up_space;
 
 int scorewidth;
 int scoreheight;
+int accuracy = 100;
+
+int correctWordsTyped = 0;
+int correctLettersTyped = 0;
+int totalLettersTyped = 0;
 
 RectangleShape GameSpaceRectangle;
 RectangleShape ScoreDetailsRectangle;
@@ -41,6 +46,7 @@ string words_list[10005];
 
 vector<Text*> text_list;
 
+vector<char> lettersTyped;
 
 /// ---------------------------- GLOBALS ----------------------------------
 
@@ -131,6 +137,54 @@ void set_SizeColorString_of_Text(Text& text, int fontsize, Color color, string s
     text.setCharacterSize(fontsize);
     text.setFillColor(color);
     text.setString(str);
+}
+
+void update_accuracy() {
+    if (totalLettersTyped == 0) return;
+    accuracy = ( correctLettersTyped * 100 ) / totalLettersTyped;
+}
+
+bool checkLettersWithWord(Text wordToCheck) {
+    string word = wordToCheck.getString();
+    int vSize = lettersTyped.size();
+
+    int wordSize = word.size();
+    int matchingLetters = 0;
+
+    for (int i = vSize-1; i >= 0; i--) {
+        if (matchingLetters == wordSize) {
+            correctWordsTyped++;
+            correctLettersTyped += wordSize;
+            update_accuracy();
+            return true;
+        }
+        if (tolower(lettersTyped[i]) == tolower(word[wordSize - matchingLetters - 1])) {
+            matchingLetters++;
+        }
+        else return false;
+    }
+    if (matchingLetters == wordSize) {
+        correctWordsTyped++;
+        correctLettersTyped += wordSize;
+        update_accuracy();
+        return true;
+    }
+    return false;
+
+}
+
+void checkMatchingWords() {
+    /// lettersTyped matches with text_list
+    for (auto it = text_list.begin(); it != text_list.end();) {
+        
+        if (checkLettersWithWord(**it)) {
+            delete* it;
+            text_list.erase(it);
+            text_list.shrink_to_fit();
+            break;
+        }
+        ++it;
+    }
 }
 
 int main()
@@ -350,7 +404,7 @@ int main()
     /// ---------------------------------- SCOREBOARD INFO ----------------------------
 
 
-    int gameSpeed = 160;
+    int gameSpeed = 60;
     int currentGameScore = 0;
     int currentGameSpeed = 0;
     float currentGameTimeSpent = 0;
@@ -402,10 +456,34 @@ int main()
     centerTextInRectangle(ACCURACY, ScoreDetailsRectangle);
     ACCURACY.setPosition(ACCURACY.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 45 / 100);
 
+    Text accuracyNumber;
+    accuracyNumber.setFont(numbersFont);
+    accuracyNumber.setCharacterSize(35);
+    accuracyNumber.setFillColor(Color::White);
+    accuracyNumber.setString("100%");
+    centerTextInRectangle(accuracyNumber, ScoreDetailsRectangle);
+    accuracyNumber.setPosition(accuracyNumber.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 55 / 100);
+
     Text RANK = SCOREBOARD;
     RANK.setString("RANK");
     centerTextInRectangle(RANK, ScoreDetailsRectangle);
     RANK.setPosition(RANK.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 65 / 100);
+
+    CircleShape rankCircle;
+    rankCircle.setRadius(80);
+    rankCircle.setFillColor(Color::Black);
+    rankCircle.setOutlineThickness(2);
+    rankCircle.setOutlineColor(Color::White);
+    rankCircle.setOrigin(80, 80);
+    rankCircle.setPosition(RANK.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 82 / 100);
+
+    Text rankSign = RANK;
+    rankSign.setString("SS");
+    rankSign.setCharacterSize(50);
+    sf::FloatRect rankRect = rankSign.getLocalBounds();
+    rankSign.setOrigin(rankRect.left + rankRect.width / 2.0f, rankRect.top + rankRect.height / 2.0f);
+    rankSign.setPosition(rankCircle.getPosition().x, rankCircle.getPosition().y);
+
 
     Text WPM;
     WPM.setFont(numbersFont);
@@ -536,10 +614,14 @@ int main()
                         }
                         text_list.clear();
                         currentState = lastState; /// return to the last game mode You've been playing !
-                        currentGameTimeSpent = 0;
+                        accuracy = 100;
+                        correctLettersTyped = 0;
+                        totalLettersTyped = 0;
                         totalGameTimeSpent = 0;
-                        gameSpawnRate = 1.0;
+                        gameSpawnRate = 1.5;
                         currentGameLifes = 3;
+                        currentGameSpeed = 60;
+                        correctWordsTyped = 0;
                         continue;
                     }
                     if (exitBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
@@ -591,7 +673,27 @@ int main()
             }
 
             /// managing letters typed;
+            if (event.type == sf::Event::KeyPressed) {
+                if (!(currentState == AppState::PlayingSurvival or currentState == AppState::PlayingEasy
+                    or currentState == AppState::PlayingMedium or currentState == AppState::PlayingHard
+                    or currentState == AppState::PlayingExpert)) continue;
 
+                // I want to process letters / words just if I'm playing the game.
+
+                if (sf::Keyboard::A <= event.key.code and event.key.code <= sf::Keyboard::Z) {
+                    char letter = 'A' + (event.key.code - sf::Keyboard::A);
+                    // cout << letter << '\n';
+                    totalLettersTyped++;
+                    lettersTyped.push_back(letter);
+                }
+
+                if (event.key.code == sf::Keyboard::Space)
+                {
+                    // totalLettersTyped += lettersTyped.size();
+                    lettersTyped.clear();
+                    update_accuracy();
+                }
+            }
 
         }
 
@@ -615,6 +717,10 @@ int main()
             window.draw(WordsPerMinute);
             window.draw(ACCURACY);
             window.draw(RANK);
+            window.draw(rankCircle);
+            window.draw(rankSign);
+
+            window.draw(accuracyNumber);
 
             /// the red rectangle is the location of all the information
             /// ScoreDetailsRectangle
@@ -673,6 +779,7 @@ int main()
 
                 /// -0.005 is the good time;
                 gameSpawnRate -= 0.005;
+                currentGameSpeed += 0.005;
                 secondCountertime = Time::Zero;
             }
 
@@ -683,10 +790,31 @@ int main()
                 elapsedTime = Time::Zero;
             }
 
+            /// Checking if typed words match with existing falling words:
+
+            checkMatchingWords();
+
+            //std::ostringstream acc;
+            //acc << std::fixed << std::setprecision(2) << accuracy;
+
+            accuracyNumber.setString(to_string(accuracy) + "%");
+
+            cout << accuracy << '\n';
+
+            if (accuracy == 100) rankSign.setString("SS");
+            if (95 <= accuracy <= 99) rankSign.setString("S");
+            if (90 <= accuracy <= 94) rankSign.setString("A");
+            if (80 <= accuracy <= 89) rankSign.setString("B");
+            if (70 <= accuracy <= 79) rankSign.setString("C");
+            if (accuracy <= 69) rankSign.setString("D");
+           
+
+
+
             /// Drawing the falling words :
 
             for (auto it = text_list.begin(); it != text_list.end();) {
-                (*it)->move(0, gameSpeed * frameTime.asSeconds());
+                (*it)->move(0, currentGameSpeed * frameTime.asSeconds());
 
                 // if ((*it)->getPosition().y > up_space + gamespace_side) {
                 if (!isTextFullyInside((**it), GameSpaceRectangle)) {
@@ -729,9 +857,13 @@ int main()
 
         if (currentState == AppState::Menu) {
 
+            accuracy = 100;
+            correctLettersTyped = 0;
+            totalLettersTyped = 0;
             totalGameTimeSpent = 0;
-            gameSpawnRate = 1.0;
+            gameSpawnRate = 1.5;
             currentGameLifes = 3;
+            correctWordsTyped = 0;
 
 
             gameClock.restart();
@@ -739,7 +871,7 @@ int main()
             clock.restart();
 
             currentGameScore = 0;
-            currentGameSpeed = 0;
+            currentGameSpeed = 60;
             currentGameTimeSpent = 0;
 
             window.draw(WELCOME);
@@ -764,6 +896,7 @@ int main()
 
         if (currentState == AppState::Finished) {
             /// I will display the scores + STATS;
+            currentState = AppState::Menu;
         }
 
         /// ----------------------- DRAW ----------------------------
