@@ -422,16 +422,40 @@ int main()
     
     int heartSize = 50;
 
-    RectangleShape heart1(Vector2f(heartSize, heartSize));
-    heart1.setPosition(0, 0);
+    // RectangleShape heart1(Vector2f(heartSize, heartSize));
     
     Texture heartTexture;
     heartTexture.loadFromFile("assets/heart2.png");
-    Sprite heartSprite(heartTexture);
+    Sprite heart1(heartTexture);
+    Sprite heart2(heartTexture);
+    Sprite heart3(heartTexture);
 
-    heartSprite.setPosition(0, 0);
-    heartSprite.setScale(2, 2);
+    heart1.setScale(2, 2);
+    heart2.setScale(2, 2);
+    heart3.setScale(2, 2);
 
+
+    // up_space
+    int heart1xPos = GameSpaceRectangle.getPosition().x + GameSpaceRectangle.getSize().x;
+    int heart2xPos = heart1xPos + heartTexture.getSize().x;
+    int heart3xPos = heart2xPos + heartTexture.getSize().x;
+    heart1.setPosition(heart1xPos, up_space);
+    heart2.setPosition(heart2xPos, up_space);
+    heart3.setPosition(heart3xPos, up_space);
+
+    Texture deadHeartTexture;
+    deadHeartTexture.loadFromFile("assets/deadHeart.png");
+    Sprite deadHeart1(deadHeartTexture);
+    Sprite deadHeart2(deadHeartTexture);
+    Sprite deadHeart3(deadHeartTexture);
+
+    deadHeart1.setScale(2, 2);
+    deadHeart2.setScale(2, 2);
+    deadHeart3.setScale(2, 2);
+
+    deadHeart1.setPosition(heart1.getPosition().x, heart1.getPosition().y);
+    deadHeart2.setPosition(heart2.getPosition().x, heart2.getPosition().y);
+    deadHeart3.setPosition(heart3.getPosition().x, heart3.getPosition().y);
 
     /// ----------------------------------- HEARTS -------------------------------------
 
@@ -566,6 +590,9 @@ int main()
 
             }
 
+            /// managing letters typed;
+
+
         }
 
         window.clear();
@@ -589,7 +616,6 @@ int main()
             window.draw(ACCURACY);
             window.draw(RANK);
 
-            window.draw(heartSprite);
             /// the red rectangle is the location of all the information
             /// ScoreDetailsRectangle
         }
@@ -601,6 +627,27 @@ int main()
 
             window.draw(secondsPassedText);
             window.draw(WPM);
+
+            if (currentGameLifes == 3) {
+                window.draw(heart1);
+                window.draw(heart2);
+                window.draw(heart3);
+            }
+            if (currentGameLifes == 2) {
+                window.draw(heart1);
+                window.draw(heart2);
+                window.draw(deadHeart3);
+            }
+            if (currentGameLifes == 1) {
+                window.draw(heart1);
+                window.draw(deadHeart2);
+                window.draw(deadHeart3);
+            }
+            if (currentGameLifes == 0) {
+                window.draw(deadHeart1);
+                window.draw(deadHeart2);
+                window.draw(deadHeart3);
+            }
 
             Time frameTime = clock.restart();
             elapsedTime += frameTime;
@@ -645,7 +692,7 @@ int main()
                 if (!isTextFullyInside((**it), GameSpaceRectangle)) {
                     delete* it;
                     it = text_list.erase(it);
-                    //currentGameLifes--;
+                    currentGameLifes--;
                 }
                 else {
                     window.draw(**it);
