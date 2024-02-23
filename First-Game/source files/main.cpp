@@ -11,8 +11,8 @@
 using namespace std;
 using namespace sf;
 
-int resolution_width = 1920;
-int resolution_height = 1080;
+int resolution_width = 1920; /// 2560
+int resolution_height = 1080; /// 1440
 
 enum class AppState {
     Menu,
@@ -103,7 +103,7 @@ void generate_and_push_word(Font& font, int font_size, Color color) {
     Text* new_text = new Text();
     (*new_text).setFont(font);
     (*new_text).setString(rand_word);
-    (*new_text).setCharacterSize(20); /// CHANGE FONT SIZE LATER MAYBE
+    (*new_text).setCharacterSize(18); /// CHANGE FONT SIZE LATER MAYBE
     (*new_text).setFillColor(Color::White);
 
     // left_space -> left_space + gamespace_side
@@ -155,6 +155,7 @@ bool checkLettersWithWord(Text wordToCheck) {
         if (matchingLetters == wordSize) {
             correctWordsTyped++;
             correctLettersTyped += wordSize;
+            lettersTyped.clear();
             update_accuracy();
             return true;
         }
@@ -166,6 +167,7 @@ bool checkLettersWithWord(Text wordToCheck) {
     if (matchingLetters == wordSize) {
         correctWordsTyped++;
         correctLettersTyped += wordSize;
+        lettersTyped.clear();
         update_accuracy();
         return true;
     }
@@ -185,6 +187,14 @@ void checkMatchingWords() {
         }
         ++it;
     }
+}
+
+string get_word_fromInput() {
+    string ans = "";
+    for (int i = 0; i < lettersTyped.size(); i++) {
+        ans += lettersTyped[i];
+    }
+    return ans;
 }
 
 int main()
@@ -537,6 +547,22 @@ int main()
 
     /// ----------------------------------- HEARTS -------------------------------------
 
+    /// ---------------------------------- INTERACTIVE ---------------------------------
+
+    Text writtenWord;
+    writtenWord.setFont(words_font);
+    writtenWord.setCharacterSize(30);
+    centerTextInRectangle(writtenWord, GameSpaceRectangle);
+    writtenWord.setPosition(GameSpaceRectangle.getPosition().x + GameSpaceRectangle.getSize().x / 3, GameSpaceRectangle.getPosition().y + GameSpaceRectangle.getSize().y + resolution_height * 1 / 100);
+    sf::FloatRect writtenWordRect = writtenWord.getLocalBounds();
+    writtenWord.setOrigin(writtenWordRect.left + writtenWordRect.width / 2.0f, writtenWordRect.top + writtenWordRect.height / 2.0f);
+
+    RectangleShape line(Vector2f(GameSpaceRectangle.getSize().y / 3, 1));
+    line.setPosition(GameSpaceRectangle.getPosition().x + GameSpaceRectangle.getSize().x / 3, GameSpaceRectangle.getPosition().y + GameSpaceRectangle.getSize().y + resolution_height * 5 / 100);
+
+
+    /// ---------------------------------- INTERACTIVE ---------------------------------
+
     AppState currentState = AppState::Menu;
     AppState lastState = AppState::Menu;
     // -> speed = words / minute
@@ -687,11 +713,20 @@ int main()
                     lettersTyped.push_back(letter);
                 }
 
-                if (event.key.code == sf::Keyboard::Space)
+                if (event.key.code == sf::Keyboard::Space or event.key.code == sf::Keyboard::Enter)
                 {
                     // totalLettersTyped += lettersTyped.size();
                     lettersTyped.clear();
                     update_accuracy();
+                }
+
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::BackSpace) {
+                    
+                    if (!lettersTyped.empty()) {
+                        totalLettersTyped--;
+                        lettersTyped.pop_back();
+                        /// SOMEHOW CAN MAKE THE ACCURACT EXCEED 100% ?????????????????????????????????????????
+                    }
                 }
             }
 
@@ -721,6 +756,8 @@ int main()
             window.draw(rankSign);
 
             window.draw(accuracyNumber);
+            window.draw(line);
+            window.draw(writtenWord);
 
             /// the red rectangle is the location of all the information
             /// ScoreDetailsRectangle
@@ -799,13 +836,16 @@ int main()
 
             accuracyNumber.setString(to_string(accuracy) + "%");
 
-            cout << accuracy << '\n';
+            string cuvant = get_word_fromInput();
+            writtenWord.setString(cuvant);
+
+            // cout << accuracy << '\n';
 
             if (accuracy == 100) rankSign.setString("SS");
-            if (95 <= accuracy <= 99) rankSign.setString("S");
-            if (90 <= accuracy <= 94) rankSign.setString("A");
-            if (80 <= accuracy <= 89) rankSign.setString("B");
-            if (70 <= accuracy <= 79) rankSign.setString("C");
+            if (95 <= accuracy and accuracy <= 99) rankSign.setString("S");
+            if (90 <= accuracy and accuracy <= 94) rankSign.setString("A");
+            if (80 <= accuracy and accuracy <= 89) rankSign.setString("B");
+            if (70 <= accuracy and accuracy <= 79) rankSign.setString("C");
             if (accuracy <= 69) rankSign.setString("D");
            
 
@@ -864,7 +904,14 @@ int main()
             gameSpawnRate = 1.5;
             currentGameLifes = 3;
             correctWordsTyped = 0;
+            lettersTyped.clear();
 
+            text_list.shrink_to_fit();
+            for (auto it = text_list.begin(); it != text_list.end();) {
+                delete* it;
+                ++it;
+            }
+            text_list.clear();
 
             gameClock.restart();
             // gameClockPauseTime = gameClock.getElapsedTime();
