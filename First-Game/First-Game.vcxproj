@@ -140,6 +140,11 @@
     <ClCompile Include="source files\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="scoreFiles\easyScores.txt" />
+    <Text Include="scoreFiles\expertScores.txt" />
+    <Text Include="scoreFiles\hardScores.txt" />
+    <Text Include="scoreFiles\mediumScores.txt" />
+    <Text Include="scoreFiles\survivalScores.txt" />
     <Text Include="words.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

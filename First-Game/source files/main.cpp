@@ -21,6 +21,7 @@ enum class AppState {
     PlayingMedium,
     PlayingHard,
     PlayingExpert,
+    GameStats,
     Paused,
     Finished
 };
@@ -563,6 +564,38 @@ int main()
 
     /// ---------------------------------- INTERACTIVE ---------------------------------
 
+    /// -------------------------- GAME STATS APPEARANCE -------------------------------
+
+    Text END_OF_GAME = WELCOME;
+    END_OF_GAME.setString("END OF GAME");
+
+
+    FloatRect endOfGameBounds = END_OF_GAME.getLocalBounds();
+    END_OF_GAME.setOrigin(endOfGameBounds.left + endOfGameBounds.width / 2.0f, endOfGameBounds.top + endOfGameBounds.height / 2.0f);
+    END_OF_GAME.setPosition(resolution_width / 2.0f, resolution_height * 10 / 100);
+
+
+    /// -------------------------- GAME STATS APPEARANCE -------------------------------
+
+    /// -------------------------------- LOADING SCORES --------------------------------
+
+    float scoreSurvival = 0, highScoreSurvival = 0;
+
+    ifstream inputSurvival("scoreFiles/survivalScores.txt");
+    ofstream outputSurvival("scoreFiles/survivalScores.txt", std::ios::app); /// to append
+
+    //inputSurvival >> scoreSurvival;
+    //cout << scoreSurvival << '\n';
+
+    while (inputSurvival >> scoreSurvival) {
+        if (scoreSurvival > highScoreSurvival) {
+            highScoreSurvival = scoreSurvival;
+        }
+    }
+
+    /// -------------------------------- LOADING SCORES --------------------------------
+
+
     AppState currentState = AppState::Menu;
     AppState lastState = AppState::Menu;
     // -> speed = words / minute
@@ -726,7 +759,7 @@ int main()
                     if (!lettersTyped.empty()) {
                         totalLettersTyped--;
                         lettersTyped.pop_back();
-                        /// SOMEHOW CAN MAKE THE ACCURACT EXCEED 100% ?????????????????????????????????????????
+                        /// SOMEHOW CAN MAKE THE ACCURACY EXCEED 100% ?????????????????????????????????????????
                     }
                 }
             }
@@ -944,7 +977,21 @@ int main()
 
         if (currentState == AppState::Finished) {
             /// I will display the scores + STATS;
-            currentState = AppState::Menu;
+            if (lastState == AppState::PlayingSurvival) {
+
+                outputSurvival << finalGameTime << '\n';
+
+                if (finalGameTime > highScoreSurvival) {
+                    highScoreSurvival = finalGameTime;
+                }
+            }
+            currentState = AppState::GameStats;
+        }
+
+        if (currentState == AppState::GameStats) {
+            window.draw(END_OF_GAME);
+
+            
         }
 
         /// ----------------------- DRAW ----------------------------

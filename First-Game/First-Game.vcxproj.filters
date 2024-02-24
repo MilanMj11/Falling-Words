@@ -21,5 +21,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="words.txt" />
+    <Text Include="scoreFiles\survivalScores.txt" />
+    <Text Include="scoreFiles\easyScores.txt" />
+    <Text Include="scoreFiles\mediumScores.txt" />
+    <Text Include="scoreFiles\hardScores.txt" />
+    <Text Include="scoreFiles\expertScores.txt" />
   </ItemGroup>
 </Project>
