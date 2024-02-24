@@ -639,6 +639,7 @@ int main()
                             it = text_list.erase(it);
                         }
                         text_list.clear();
+                        lettersTyped.clear();
                         currentState = lastState; /// return to the last game mode You've been playing !
                         accuracy = 100;
                         correctLettersTyped = 0;
