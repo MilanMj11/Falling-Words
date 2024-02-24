@@ -322,7 +322,12 @@ int main()
 
 
     /// ----------------------------------- PAUSED APPEARANCE --------------------------------
-
+    
+    Font numbersFont;
+    if (!numbersFont.loadFromFile("assets/Nexa-Heavy.ttf")) {
+        cout << "Erorr loading numbers font!";
+        return 0;
+    }
 
     /// ----------------------------------- MENU APPEARANCE --------------------------------
 
@@ -388,7 +393,7 @@ int main()
 
 
     Text HighScoreSurvival, HighScoreEasy, HighScoreMedium, HighScoreHard, HighScoreExpert;
-    HighScoreSurvival.setFont(words_font);
+    HighScoreSurvival.setFont(numbersFont);
     set_SizeColorString_of_Text(HighScoreSurvival, 50, Color::White, "-> HIGH SCORE:");
     HighScoreEasy = HighScoreSurvival;
     HighScoreMedium = HighScoreSurvival;
@@ -430,12 +435,8 @@ int main()
     Time secondCountertime;
     Time gameClockPauseTime;
 
+
     Text secondsPassedText;
-    Font numbersFont;
-    if (!numbersFont.loadFromFile("assets/Nexa-Heavy.ttf")) {
-        cout << "Erorr loading numbers font!";
-        return 0;
-    }
     secondsPassedText.setFont(numbersFont);
     // secondsPassedText.setPosition(0, 0);
     secondsPassedText.setFillColor(Color::White);
@@ -575,6 +576,29 @@ int main()
     END_OF_GAME.setPosition(resolution_width / 2.0f, resolution_height * 10 / 100);
 
 
+    Text FINAL_STATS = END_OF_GAME;
+    FINAL_STATS.setString("FINAL STATS:");
+    FINAL_STATS.setCharacterSize(100);
+    FloatRect finalStatsBounds = FINAL_STATS.getLocalBounds();
+    FINAL_STATS.setOrigin(finalStatsBounds.left + finalStatsBounds.width / 2.0f, finalStatsBounds.top + finalStatsBounds.height / 2.0f);
+    FINAL_STATS.setPosition(END_OF_GAME.getPosition().x, END_OF_GAME.getPosition().y + resolution_height * 14 / 100);
+
+    RectangleShape StatsLine(Vector2f(resolution_width * 60 / 100, 3));
+    StatsLine.setPosition(resolution_width * 20 / 100, resolution_height * 17 / 100);
+
+    
+    Text END_OF_GAME_STATS;
+    END_OF_GAME_STATS.setFont(words_font);
+    END_OF_GAME_STATS.setCharacterSize(40);
+    END_OF_GAME_STATS.setPosition(resolution_width * 10 / 100, resolution_height * 40 / 100);
+    END_OF_GAME_STATS.setString("Score :\n \nWords Per Minute :\n \nAccuracy :\n \nRank : \n \n");
+
+    Text endOfGameStats;
+    endOfGameStats.setFont(numbersFont);
+    endOfGameStats.setCharacterSize(38);
+    endOfGameStats.setPosition(resolution_width * 40 / 100, resolution_height * 38 / 100);
+    endOfGameStats.setString("score\n\nWPM\n\nAcc\n\nRank\n\n");
+
     /// -------------------------- GAME STATS APPEARANCE -------------------------------
 
     /// -------------------------------- LOADING SCORES --------------------------------
@@ -592,6 +616,12 @@ int main()
             highScoreSurvival = scoreSurvival;
         }
     }
+    
+
+    std::ostringstream hss;
+    hss << std::fixed << std::setprecision(2) << highScoreSurvival;
+
+    HighScoreSurvival.setString("-> HIGH SCORE:    " + hss.str() + "s");
 
     /// -------------------------------- LOADING SCORES --------------------------------
 
@@ -648,6 +678,11 @@ int main()
                         currentState = AppState::Menu;
                         continue;
                     }
+                    if (currentState == AppState::GameStats) {
+                        currentState = AppState::Menu;
+                        continue;
+                    }
+
                 }
             }
 
@@ -977,20 +1012,37 @@ int main()
 
         if (currentState == AppState::Finished) {
             /// I will display the scores + STATS;
+            /// endOfGameStats
+            // endOfGameStats.setString("score\n\nWPM\n\nAcc\n\nRank\n\n");
+
+            string statsString;
+
+            std::ostringstream fgt;
+            fgt << std::fixed << std::setprecision(2) << finalGameTime;
+
+            statsString = fgt.str() + "s\n\n" + WPM.getString()  + "\n\n" + accuracyNumber.getString() + "\n\n" + rankSign.getString();
+            endOfGameStats.setString(statsString);
+
             if (lastState == AppState::PlayingSurvival) {
 
                 outputSurvival << finalGameTime << '\n';
 
                 if (finalGameTime > highScoreSurvival) {
                     highScoreSurvival = finalGameTime;
+                    HighScoreSurvival.setString("-> HIGH SCORE: " + fgt.str());
                 }
+
+
             }
             currentState = AppState::GameStats;
         }
 
         if (currentState == AppState::GameStats) {
             window.draw(END_OF_GAME);
-
+            window.draw(FINAL_STATS);
+            window.draw(StatsLine);
+            window.draw(END_OF_GAME_STATS);
+            window.draw(endOfGameStats);
             
         }
 
