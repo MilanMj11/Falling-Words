@@ -591,12 +591,12 @@ int main()
     END_OF_GAME_STATS.setFont(words_font);
     END_OF_GAME_STATS.setCharacterSize(40);
     END_OF_GAME_STATS.setPosition(resolution_width * 10 / 100, resolution_height * 40 / 100);
-    END_OF_GAME_STATS.setString("Score :\n \nWords Per Minute :\n \nAccuracy :\n \nRank : \n \n");
+    END_OF_GAME_STATS.setString("Score :\n \nWords Per Minute :\n \nAccuracy :\n \nRank : \n \nWords typed :\n\n");
 
     Text endOfGameStats;
     endOfGameStats.setFont(numbersFont);
-    endOfGameStats.setCharacterSize(38);
-    endOfGameStats.setPosition(resolution_width * 40 / 100, resolution_height * 38 / 100);
+    endOfGameStats.setCharacterSize(37);
+    endOfGameStats.setPosition(resolution_width * 40 / 100, resolution_height * 37.5 / 100);
     endOfGameStats.setString("score\n\nWPM\n\nAcc\n\nRank\n\n");
 
     /// -------------------------- GAME STATS APPEARANCE -------------------------------
@@ -828,18 +828,6 @@ int main()
             window.draw(line);
             window.draw(writtenWord);
 
-            /// the red rectangle is the location of all the information
-            /// ScoreDetailsRectangle
-        }
-
-        /// scoreboard
-
-
-        if (currentState == AppState::PlayingSurvival) {
-
-            window.draw(secondsPassedText);
-            window.draw(WPM);
-
             if (currentGameLifes == 3) {
                 window.draw(heart1);
                 window.draw(heart2);
@@ -860,6 +848,20 @@ int main()
                 window.draw(deadHeart2);
                 window.draw(deadHeart3);
             }
+
+            /// the red rectangle is the location of all the information
+            /// ScoreDetailsRectangle
+        }
+
+        /// scoreboard
+
+
+        if (currentState == AppState::PlayingSurvival) {
+
+            window.draw(secondsPassedText);
+            window.draw(WPM);
+
+            
 
             Time frameTime = clock.restart();
             elapsedTime += frameTime;
@@ -1020,7 +1022,7 @@ int main()
             std::ostringstream fgt;
             fgt << std::fixed << std::setprecision(2) << finalGameTime;
 
-            statsString = fgt.str() + "s\n\n" + WPM.getString()  + "\n\n" + accuracyNumber.getString() + "\n\n" + rankSign.getString();
+            statsString = fgt.str() + "s\n\n" + WPM.getString()  + "\n\n" + accuracyNumber.getString() + "\n\n" + rankSign.getString() + "\n\n" + to_string(correctWordsTyped);
             endOfGameStats.setString(statsString);
 
             if (lastState == AppState::PlayingSurvival) {
