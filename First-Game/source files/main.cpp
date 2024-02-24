@@ -39,6 +39,16 @@ int accuracy = 100;
 int correctWordsTyped = 0;
 int correctLettersTyped = 0;
 int totalLettersTyped = 0;
+int currentGameCombo = 0;
+
+int gameSpeed = 60;
+int currentGameScore = 0;
+int currentGameSpeed = 0;
+float currentGameTimeSpent = 0;
+float totalGameTimeSpent = 0;
+float gameSpawnRate = 1.0;
+float finalGameTime = 0;
+int currentGameLifes = 3;
 
 RectangleShape GameSpaceRectangle;
 RectangleShape ScoreDetailsRectangle;
@@ -104,7 +114,7 @@ void generate_and_push_word(Font& font, int font_size, Color color) {
     Text* new_text = new Text();
     (*new_text).setFont(font);
     (*new_text).setString(rand_word);
-    (*new_text).setCharacterSize(18); /// CHANGE FONT SIZE LATER MAYBE
+    (*new_text).setCharacterSize(font_size); /// CHANGE FONT SIZE LATER MAYBE
     (*new_text).setFillColor(Color::White);
 
     // left_space -> left_space + gamespace_side
@@ -156,6 +166,8 @@ bool checkLettersWithWord(Text wordToCheck) {
         if (matchingLetters == wordSize) {
             correctWordsTyped++;
             correctLettersTyped += wordSize;
+            currentGameCombo++;
+            currentGameScore += wordSize * 10 * currentGameCombo;
             lettersTyped.clear();
             update_accuracy();
             return true;
@@ -168,6 +180,8 @@ bool checkLettersWithWord(Text wordToCheck) {
     if (matchingLetters == wordSize) {
         correctWordsTyped++;
         correctLettersTyped += wordSize;
+        currentGameCombo++;
+        currentGameScore += wordSize * 10 * currentGameCombo;
         lettersTyped.clear();
         update_accuracy();
         return true;
@@ -420,14 +434,7 @@ int main()
     /// ---------------------------------- SCOREBOARD INFO ----------------------------
 
 
-    int gameSpeed = 60;
-    int currentGameScore = 0;
-    int currentGameSpeed = 0;
-    float currentGameTimeSpent = 0;
-    float totalGameTimeSpent = 0;
-    float gameSpawnRate = 1.0;
-    float finalGameTime = 0;
-    int currentGameLifes = 3;
+    
 
     Clock gameClock;
     Clock clock;
@@ -445,6 +452,16 @@ int main()
 
     centerTextInRectangle(secondsPassedText, ScoreDetailsRectangle);
     secondsPassedText.setPosition(secondsPassedText.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 15 / 100);
+
+
+    Text gameScoreText; 
+    gameScoreText = secondsPassedText;
+    gameScoreText.setString("0");
+    centerTextInRectangle(gameScoreText, ScoreDetailsRectangle);
+    gameScoreText.setPosition(gameScoreText.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 15 / 100);
+   
+
+    // currentGameScore
 
     /// ---------------------------------- SCOREBOARD INFO ----------------------------
 
@@ -547,6 +564,21 @@ int main()
     deadHeart2.setPosition(heart2.getPosition().x, heart2.getPosition().y);
     deadHeart3.setPosition(heart3.getPosition().x, heart3.getPosition().y);
 
+    // --> the combo on the same part as the hearts:
+
+    Text currentGameComboText;
+    currentGameComboText.setFont(numbersFont);
+    currentGameComboText.setString("x0");
+    currentGameComboText.setOrigin(currentGameComboText.getLocalBounds().width / 2, currentGameComboText.getLocalBounds().height / 2);
+    currentGameComboText.setPosition(GameSpaceRectangle.getPosition().x + GameSpaceRectangle.getSize().x + resolution_width * 5 / 100 , GameSpaceRectangle.getPosition().y + GameSpaceRectangle.getSize().y / 2);
+
+    CircleShape comboCircle(60);
+    comboCircle.setFillColor(Color::Black);
+    comboCircle.setOutlineThickness(2);
+    comboCircle.setOutlineColor(Color::White);
+    comboCircle.setOrigin(comboCircle.getRadius(), comboCircle.getRadius());
+    comboCircle.setPosition(currentGameComboText.getPosition().x, currentGameComboText.getPosition().y + 10);
+
     /// ----------------------------------- HEARTS -------------------------------------
 
     /// ---------------------------------- INTERACTIVE ---------------------------------
@@ -599,7 +631,58 @@ int main()
     endOfGameStats.setPosition(resolution_width * 40 / 100, resolution_height * 37.5 / 100);
     endOfGameStats.setString("score\n\nWPM\n\nAcc\n\nRank\n\n");
 
+
     /// -------------------------- GAME STATS APPEARANCE -------------------------------
+
+    /// ------------------------------ GAME MODE TITLE ---------------------------------
+
+    Text survivalTitle;
+    survivalTitle.setFont(words_font);
+    survivalTitle.setString("SURVIVAL");
+    survivalTitle.setCharacterSize(70);
+    survivalTitle.setFillColor(Color::Cyan);
+    FloatRect survivalTitleBounds = survivalTitle.getLocalBounds();
+    survivalTitle.setOrigin(survivalTitleBounds.left + survivalTitleBounds.width / 2.0f, survivalTitleBounds.top + survivalTitleBounds.height / 2.0f);
+    survivalTitle.setPosition(resolution_width / 2, 50);
+
+    Text easyTitle;
+    easyTitle.setFont(words_font);
+    easyTitle.setString("EASY");
+    easyTitle.setCharacterSize(70);
+    easyTitle.setFillColor(Color::Green);
+    FloatRect easyTitleBounds = easyTitle.getLocalBounds();
+    easyTitle.setOrigin(easyTitleBounds.left + easyTitleBounds.width / 2.0f, easyTitleBounds.top + easyTitleBounds.height / 2.0f);
+    easyTitle.setPosition(resolution_width / 2, 50);
+
+    Text mediumTitle;
+    mediumTitle.setFont(words_font);
+    mediumTitle.setString("MEDIUM");
+    mediumTitle.setCharacterSize(70);
+    mediumTitle.setFillColor(Color::Yellow); 
+    FloatRect mediumTitleBounds = mediumTitle.getLocalBounds();
+    mediumTitle.setOrigin(mediumTitleBounds.left + mediumTitleBounds.width / 2.0f, mediumTitleBounds.top + mediumTitleBounds.height / 2.0f);
+    mediumTitle.setPosition(resolution_width / 2, 50);
+
+
+    Text hardTitle;
+    hardTitle.setFont(words_font);
+    hardTitle.setString("HARD");
+    hardTitle.setCharacterSize(70);
+    hardTitle.setFillColor(orangeColor);
+    FloatRect hardTitleBounds = hardTitle.getLocalBounds();
+    hardTitle.setOrigin(hardTitleBounds.left + hardTitleBounds.width / 2.0f, hardTitleBounds.top + hardTitleBounds.height / 2.0f);
+    hardTitle.setPosition(resolution_width / 2, 50);
+
+    Text expertTitle;
+    expertTitle.setFont(words_font);
+    expertTitle.setString("EXPERT");
+    expertTitle.setCharacterSize(70);
+    expertTitle.setFillColor(Color::Red);
+    FloatRect expertTitleBounds = expertTitle.getLocalBounds();
+    expertTitle.setOrigin(expertTitleBounds.left + expertTitleBounds.width / 2.0f, expertTitleBounds.top + expertTitleBounds.height / 2.0f);
+    expertTitle.setPosition(resolution_width / 2, 50);
+
+    /// ------------------------------ GAME MODE TITLE ---------------------------------
 
     /// -------------------------------- LOADING SCORES --------------------------------
 
@@ -608,20 +691,76 @@ int main()
     ifstream inputSurvival("scoreFiles/survivalScores.txt");
     ofstream outputSurvival("scoreFiles/survivalScores.txt", std::ios::app); /// to append
 
-    //inputSurvival >> scoreSurvival;
-    //cout << scoreSurvival << '\n';
-
     while (inputSurvival >> scoreSurvival) {
         if (scoreSurvival > highScoreSurvival) {
             highScoreSurvival = scoreSurvival;
         }
     }
     
-
     std::ostringstream hss;
     hss << std::fixed << std::setprecision(2) << highScoreSurvival;
 
     HighScoreSurvival.setString("-> HIGH SCORE:    " + hss.str() + "s");
+
+    // --------------------
+
+    int scoreEasy = 0, highScoreEasy = 0;
+
+    ifstream inputEasy("scoreFiles/easyScores.txt");
+    ofstream outputEasy("scoreFiles/easyScores.txt", std::ios::app);
+
+    while (inputEasy >> scoreEasy) {
+        if (scoreEasy > highScoreEasy) {
+            highScoreEasy = scoreEasy;
+        }
+    }
+
+    HighScoreEasy.setString("-> HIGH SCORE:    " + to_string(highScoreEasy) + " Points");
+
+    // --------------------
+
+    int scoreMedium = 0, highScoreMedium = 0;
+
+    ifstream inputMedium("scoreFiles/mediumScores.txt");
+    ofstream outputMedium("scoreFiles/mediumScores.txt", std::ios::app);
+
+    while (inputMedium >> scoreMedium) {
+        if (scoreMedium > highScoreMedium) {
+            highScoreMedium = scoreMedium;
+        }
+    }
+
+    HighScoreMedium.setString("-> HIGH SCORE:    " + to_string(highScoreMedium) + " Points");
+
+    // --------------------
+
+    int scoreHard = 0, highScoreHard = 0;
+
+    ifstream inputHard("scoreFiles/hardScores.txt");
+    ofstream outputHard("scoreFiles/hardScores.txt", std::ios::app);
+
+    while (inputHard >> scoreHard) {
+        if (scoreHard > highScoreHard) {
+            highScoreHard = scoreHard;
+        }
+    }
+
+    HighScoreHard.setString("-> HIGH SCORE:    " + to_string(highScoreHard) + " Points");
+
+    // --------------------
+
+    int scoreExpert = 0, highScoreExpert = 0;
+
+    ifstream inputExpert("scoreFiles/expertScores.txt");
+    ofstream outputExpert("scoreFiles/expertScores.txt", std::ios::app);
+
+    while (inputExpert >> scoreExpert) {
+        if (scoreExpert > highScoreExpert) {
+            highScoreExpert = scoreExpert;
+        }
+    }
+
+    HighScoreExpert.setString("-> HIGH SCORE:    " + to_string(highScoreExpert) + " Points");
 
     /// -------------------------------- LOADING SCORES --------------------------------
 
@@ -713,9 +852,29 @@ int main()
                         correctLettersTyped = 0;
                         totalLettersTyped = 0;
                         totalGameTimeSpent = 0;
-                        gameSpawnRate = 1.5;
+                        if (lastState == AppState::PlayingSurvival) {
+                            gameSpawnRate = 1.5;
+                            currentGameSpeed = 50;
+                        }
+                        if (lastState == AppState::PlayingEasy) {
+                            gameSpawnRate = 1.7;
+                            currentGameSpeed = 60;
+                        }
+                        if (lastState == AppState::PlayingMedium) {
+                            gameSpawnRate = 1.3;
+                            currentGameSpeed = 70;
+                        }
+                        if (lastState == AppState::PlayingHard) {
+                            gameSpawnRate = 1;
+                            currentGameSpeed = 70;
+                        }
+                        if (lastState == AppState::PlayingExpert) {
+                            gameSpawnRate = 0.8;
+                            currentGameSpeed = 50;
+                        }
                         currentGameLifes = 3;
-                        currentGameSpeed = 60;
+                        currentGameScore = 0;
+                        currentGameCombo = 0;
                         correctWordsTyped = 0;
                         continue;
                     }
@@ -744,23 +903,38 @@ int main()
 
                     if (survivalBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
                         currentState = AppState::PlayingSurvival;
+                        lastState = currentState;
+                        gameSpawnRate = 1.5;
+                        currentGameSpeed = 50;
                         gameClock.restart();
                         continue;
                     }
                     if (easyBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
                         currentState = AppState::PlayingEasy;
+                        lastState = currentState;
+                        gameSpawnRate = 1.7;
+                        currentGameSpeed = 60;
                         continue;
                     }
                     if (mediumBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
                         currentState = AppState::PlayingMedium;
+                        lastState = currentState;
+                        gameSpawnRate = 1.3;
+                        currentGameSpeed = 70;
                         continue;
                     }
                     if (hardBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
                         currentState = AppState::PlayingHard;
+                        lastState = currentState;
+                        gameSpawnRate = 1;
+                        currentGameSpeed = 70;
                         continue;
                     }
                     if (expertBounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y))) {
                         currentState = AppState::PlayingExpert;
+                        lastState = currentState;
+                        gameSpawnRate = 0.8;
+                        currentGameSpeed = 50;
                         continue;
                     }
                 }
@@ -785,6 +959,7 @@ int main()
                 if (event.key.code == sf::Keyboard::Space or event.key.code == sf::Keyboard::Enter)
                 {
                     // totalLettersTyped += lettersTyped.size();
+                    currentGameCombo = 0;
                     lettersTyped.clear();
                     update_accuracy();
                 }
@@ -802,7 +977,7 @@ int main()
         }
 
         window.clear();
-
+        // lastState
         /// ----------------------- DRAW ----------------------------
 
         
@@ -811,6 +986,22 @@ int main()
         if (currentState == AppState::PlayingSurvival or currentState == AppState::PlayingEasy
             or currentState == AppState::PlayingMedium or currentState == AppState::PlayingHard
             or currentState == AppState::PlayingExpert) {
+
+            if (currentState == AppState::PlayingSurvival) {
+                window.draw(survivalTitle);
+            }
+            if (currentState == AppState::PlayingEasy) {
+                window.draw(easyTitle);
+            }
+            if (currentState == AppState::PlayingMedium) {
+                window.draw(mediumTitle);
+            }
+            if (currentState == AppState::PlayingHard) {
+                window.draw(hardTitle);
+            }
+            if (currentState == AppState::PlayingExpert) {
+                window.draw(expertTitle);
+            }
 
             /// I want to display the scoreboard with it's stats:
 
@@ -823,6 +1014,12 @@ int main()
             window.draw(RANK);
             window.draw(rankCircle);
             window.draw(rankSign);
+
+            window.draw(comboCircle);
+            currentGameComboText.setString("x" + to_string(currentGameCombo));
+            currentGameComboText.setOrigin(currentGameComboText.getLocalBounds().width / 2, currentGameComboText.getLocalBounds().height / 2);
+            // currentGameComboText.setPosition(GameSpaceRectangle.getPosition().x + GameSpaceRectangle.getSize().x + resolution_width * 5 / 100, GameSpaceRectangle.getPosition().y + GameSpaceRectangle.getSize().y / 2);
+            window.draw(currentGameComboText);
 
             window.draw(accuracyNumber);
             window.draw(line);
@@ -849,19 +1046,25 @@ int main()
                 window.draw(deadHeart3);
             }
 
+            if (accuracy == 100) rankSign.setString("SS");
+            if (95 <= accuracy and accuracy <= 99) rankSign.setString("S");
+            if (90 <= accuracy and accuracy <= 94) rankSign.setString("A");
+            if (80 <= accuracy and accuracy <= 89) rankSign.setString("B");
+            if (70 <= accuracy and accuracy <= 79) rankSign.setString("C");
+            if (accuracy <= 69) rankSign.setString("D");
+
+            sf::FloatRect rankRect2 = rankSign.getLocalBounds();
+            rankSign.setOrigin(rankRect2.left + rankRect2.width / 2.0f, rankRect2.top + rankRect2.height / 2.0f);
+
             /// the red rectangle is the location of all the information
             /// ScoreDetailsRectangle
         }
-
-        /// scoreboard
 
 
         if (currentState == AppState::PlayingSurvival) {
 
             window.draw(secondsPassedText);
             window.draw(WPM);
-
-            
 
             Time frameTime = clock.restart();
             elapsedTime += frameTime;
@@ -893,7 +1096,7 @@ int main()
 
             if (elapsedTime.asSeconds() >= gameSpawnRate) { /// Every second we generate a new word to print
 
-                generate_and_push_word(words_font, 20, Color::White);
+                generate_and_push_word(words_font, 18, Color::White);
 
                 elapsedTime = Time::Zero;
             }
@@ -910,17 +1113,6 @@ int main()
             string cuvant = get_word_fromInput();
             writtenWord.setString(cuvant);
 
-            // cout << accuracy << '\n';
-
-            if (accuracy == 100) rankSign.setString("SS");
-            if (95 <= accuracy and accuracy <= 99) rankSign.setString("S");
-            if (90 <= accuracy and accuracy <= 94) rankSign.setString("A");
-            if (80 <= accuracy and accuracy <= 89) rankSign.setString("B");
-            if (70 <= accuracy and accuracy <= 79) rankSign.setString("C");
-            if (accuracy <= 69) rankSign.setString("D");
-           
-
-
 
             /// Drawing the falling words :
 
@@ -932,6 +1124,7 @@ int main()
                     delete* it;
                     it = text_list.erase(it);
                     currentGameLifes--;
+                    currentGameCombo = 0;
                 }
                 else {
                     window.draw(**it);
@@ -949,6 +1142,67 @@ int main()
 
         }
 
+        if (currentState == AppState::PlayingEasy or currentState == AppState::PlayingMedium or currentState == AppState::PlayingHard or currentState == AppState::PlayingExpert) {
+            
+            window.draw(WPM);
+            window.draw(gameScoreText);
+
+            Time frameTime = clock.restart();
+            elapsedTime += frameTime;
+            secondCountertime += frameTime;
+
+            Time elapsed = gameClock.getElapsedTime();
+            float seconds = elapsed.asSeconds();
+
+            currentGameTimeSpent = seconds;
+
+            int wpm_nr = 60.0 / gameSpawnRate;
+            WPM.setString(to_string(wpm_nr) + " WPM");
+
+            if (elapsedTime.asSeconds() >= gameSpawnRate) { /// Every second we generate a new word to print
+
+                generate_and_push_word(words_font, 18, Color::White);
+                elapsedTime = Time::Zero;
+            }
+
+            checkMatchingWords();
+
+            accuracyNumber.setString(to_string(accuracy) + "%");
+
+            string cuvant = get_word_fromInput();
+            writtenWord.setString(cuvant);
+
+            for (auto it = text_list.begin(); it != text_list.end();) {
+                (*it)->move(0, currentGameSpeed * frameTime.asSeconds());
+
+                if (!isTextFullyInside((**it), GameSpaceRectangle)) {
+                    delete* it;
+                    it = text_list.erase(it);
+                    currentGameLifes--;
+                    currentGameCombo = 0;
+                }
+                else {
+                    window.draw(**it);
+                    ++it;
+                }
+            }
+
+            text_list.shrink_to_fit();
+
+            if (currentGameLifes <= 0) {
+                finalGameTime = totalGameTimeSpent + currentGameTimeSpent;
+                currentState = AppState::Finished;
+
+                // lastState = AppState::PlayingEasy;
+            }
+
+            // currentGameScore = correctLettersTyped * 100;
+            gameScoreText.setString(to_string(currentGameScore));
+
+            centerTextInRectangle(gameScoreText, ScoreDetailsRectangle);
+            gameScoreText.setPosition(gameScoreText.getPosition().x, ScoreDetailsRectangle.getPosition().y + ScoreDetailsRectangle.getSize().y * 15 / 100);
+
+        }
        
 
         if (currentState == AppState::Paused) { /// CAN PAUSE PRESSING ESC
@@ -975,6 +1229,7 @@ int main()
             gameSpawnRate = 1.5;
             currentGameLifes = 3;
             correctWordsTyped = 0;
+            currentGameCombo = 0;
             lettersTyped.clear();
 
             text_list.shrink_to_fit();
@@ -1017,25 +1272,73 @@ int main()
             /// endOfGameStats
             // endOfGameStats.setString("score\n\nWPM\n\nAcc\n\nRank\n\n");
 
-            string statsString;
-
-            std::ostringstream fgt;
-            fgt << std::fixed << std::setprecision(2) << finalGameTime;
-
-            statsString = fgt.str() + "s\n\n" + WPM.getString()  + "\n\n" + accuracyNumber.getString() + "\n\n" + rankSign.getString() + "\n\n" + to_string(correctWordsTyped);
-            endOfGameStats.setString(statsString);
+            
 
             if (lastState == AppState::PlayingSurvival) {
+
+                string statsString;
+
+                std::ostringstream fgt;
+                fgt << std::fixed << std::setprecision(2) << finalGameTime;
+
+                statsString = fgt.str() + "s\n\n" + WPM.getString() + "\n\n" + accuracyNumber.getString() + "\n\n" + rankSign.getString() + "\n\n" + to_string(correctWordsTyped);
+                endOfGameStats.setString(statsString);
 
                 outputSurvival << finalGameTime << '\n';
 
                 if (finalGameTime > highScoreSurvival) {
                     highScoreSurvival = finalGameTime;
-                    HighScoreSurvival.setString("-> HIGH SCORE: " + fgt.str());
+                    HighScoreSurvival.setString("-> HIGH SCORE:    " + fgt.str() + "s");
                 }
 
+            }
+
+            if (lastState == AppState::PlayingEasy or lastState == AppState::PlayingMedium or lastState == AppState::PlayingHard or lastState == AppState::PlayingExpert) {
+
+                string statsString;
+                statsString = to_string(currentGameScore) + " Points\n\n" + WPM.getString() + "\n\n" + accuracyNumber.getString() + "\n\n" + rankSign.getString() + "\n\n" + to_string(correctWordsTyped);
+                endOfGameStats.setString(statsString);
+
+
+                if (lastState == AppState::PlayingEasy) {
+
+                    outputEasy << currentGameScore << '\n';
+
+                    if (currentGameScore > highScoreEasy) {
+                        highScoreEasy = currentGameScore;
+                        HighScoreEasy.setString("-> HIGH SCORE:    " + to_string(currentGameScore) + " Points");
+                    }
+                }
+                if (lastState == AppState::PlayingMedium) {
+
+                    outputMedium << currentGameScore << '\n';
+
+                    if (currentGameScore > highScoreMedium) {
+                        highScoreMedium = currentGameScore;
+                        HighScoreMedium.setString("-> HIGH SCORE:    " + to_string(currentGameScore) + " Points");
+                    }
+                }
+                if (lastState == AppState::PlayingHard) {
+
+                    outputHard << currentGameScore << '\n';
+
+                    if (currentGameScore > highScoreHard) {
+                        highScoreHard = currentGameScore;
+                        HighScoreHard.setString("-> HIGH SCORE:    " + to_string(currentGameScore) + " Points");
+                    }
+                }
+                if (lastState == AppState::PlayingExpert) {
+
+                    outputExpert << currentGameScore << '\n';
+
+                    if (currentGameScore > highScoreExpert) {
+                        highScoreExpert = currentGameScore;
+                        HighScoreExpert.setString("-> HIGH SCORE:    " + to_string(currentGameScore) + " Points");
+                    }
+                }
 
             }
+
             currentState = AppState::GameStats;
         }
 
