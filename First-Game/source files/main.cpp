@@ -684,6 +684,24 @@ int main()
 
     /// ------------------------------ GAME MODE TITLE ---------------------------------
 
+    /// ------------------------------ PAUSE BUTTON ------------------------------------
+
+    RectangleShape pauseButton(Vector2f(69, 69));
+    pauseButton.setPosition(resolution_width - 90, 20);
+    pauseButton.setFillColor(Color::Black);
+    pauseButton.setOutlineThickness(2);
+    pauseButton.setOutlineColor(Color::White);
+
+    RectangleShape pauseLine1(Vector2f(15, 50));
+    pauseLine1.setFillColor(Color::White);
+    pauseLine1.setPosition(pauseButton.getPosition().x + 13, pauseButton.getPosition().y + 10);
+
+    RectangleShape pauseLine2(Vector2f(15, 50));
+    pauseLine2.setFillColor(Color::White);
+    pauseLine2.setPosition(pauseButton.getPosition().x + 41, pauseButton.getPosition().y + 10);
+
+    /// ------------------------------ PAUSE BUTTON ------------------------------------
+
     /// -------------------------------- LOADING SCORES --------------------------------
 
     float scoreSurvival = 0, highScoreSurvival = 0;
@@ -826,6 +844,15 @@ int main()
             }
 
             if (event.type == sf::Event::MouseButtonPressed and event.mouseButton.button == sf::Mouse::Left) {
+
+                if (currentState == AppState::PlayingSurvival or currentState == AppState::PlayingEasy or currentState == AppState::PlayingMedium
+                    or currentState == AppState::PlayingHard or currentState == AppState::PlayingExpert) {
+
+                    lastState = currentState;
+                    currentState = AppState::Paused;
+                    continue;
+
+                }
 
                 if (currentState == AppState::Paused) {
 
@@ -1007,6 +1034,10 @@ int main()
 
             window.draw(GameSpaceRectangle);
             window.draw(ScoreDetailsRectangle);
+
+            window.draw(pauseButton);
+            window.draw(pauseLine1);
+            window.draw(pauseLine2);
 
             window.draw(SCOREBOARD);
             window.draw(WordsPerMinute);
