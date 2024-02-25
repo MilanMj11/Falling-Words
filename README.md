@@ -53,6 +53,9 @@ Initially the game brings you to the Main Menu where you see all the game modes 
 3. Maintain accuracy to increase your Combo and Score.
 4. Keep an eye on your Hearts. Running out means losing the game.
 
+If you misspell a word, you can either press the Backspace key to erase the last typed letter or press 'Enter' or 'Spacebar' to delete the entire word. 
+Be cautious: erasing a single letter will not impact accuracy, but erasing the entire word will result in losing your Combo and affect your Accuracy.
+
 At any time you feel like taking a break, you may Pause the game by pressing "Esc" or pressing the Pause Button in the up-right 
 corner of the Window. You may also restart the game if you feel like you performed bad by Pausing and then pressing the Restart button.
 
