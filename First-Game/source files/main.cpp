@@ -226,11 +226,11 @@ int main()
     GameSpaceRectangle.setPosition(Vector2f(left_space, up_space));
 
     Texture backgroundTexture;
-    if (!backgroundTexture.loadFromFile("assets/galaxy.jpg")) {
+    if (!backgroundTexture.loadFromFile("assets/galaxy4k.jpg")) {
         cout << "Error loading";
         return 0;
     }
-    IntRect imageRect(0, 0, 3.5 * gamespace_side, 3.5 * gamespace_side);
+    IntRect imageRect(0, 0, 2 * gamespace_side, 2 * gamespace_side);
 
     GameSpaceRectangle.setTexture(&backgroundTexture);
     GameSpaceRectangle.setTextureRect(imageRect);
