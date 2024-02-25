@@ -4,7 +4,7 @@
 
 Welcome to Falling Words, a typing game designed to enhance your keyboard skills while providing
 an enjoyable and challenging gaming experience. Developed in C++ with the SFML library, Falling Words offers
-multiple game modes for various skill levels, ensuring both beginners and experienced typists can find a 
+multiple game modes for various skill levels, ensuring that both beginners and experienced typists can find a 
 challenge that suits them.
 
 ## Game Modes
